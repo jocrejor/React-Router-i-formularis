@@ -113,8 +113,9 @@ const validationSchema = Yup.object({
             {formik.touched.price && formik.errors.price ? (
                 <div>{formik.errors.price}</div>
             ) : null}
-            </form>
             <input type="submit" value="Alta"></input>
+            </form>
+            
             </div>
 
 
