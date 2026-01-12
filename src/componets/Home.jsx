@@ -7,10 +7,11 @@ const Home = () => {
   return (
     <div>
     <div>Home</div>
-    <Link to='/controlat'> Controlat </Link>
-    <a href="/likeapro">Formulari Like a pro</a>    
-    <button onClick={() => navigate('/controlat')}>Formulari Controlat</button>
-    <button onClick={() => navigate('/likeapro')}>Formulari Like a pro</button>
+    {/*<Link to='/controlat'> Controlat </Link>*/}
+    {/*<a href="/likeapro">Formulari Like a pro</a>*/}
+    <button onClick={() => navigate('/controlat')}>Formulari Controlat</button><br/>
+    <button onClick={() => navigate('/likeapro')}>Formulari Like a pro</button><br/>
+     <button onClick={() => navigate('/productes')}>Productes</button>
     </div>
 )
 }
