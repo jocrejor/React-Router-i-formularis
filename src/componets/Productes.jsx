@@ -2,10 +2,14 @@ import {useState,useEffect} from 'react'
 import {getData,url} from './apiAccess/crud'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
+import { Modal,Button } from 'react-bootstrap'
 
 
 const Productes = () => {
 const [data,setData]= useState([])
+const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', price: '' });
+const [showModal, setShowModal] = useState(false);
+const [tipoModal, setTipoModal] = useState("Crear");
 
 async function fetchData() {
     const dataFetch = await getData(url,'Product');
@@ -28,21 +32,44 @@ const validationSchema = Yup.object({
 })
 
     const formik = useFormik({
-    initialValues: {
-      name: '',
-      description: '',
-      price: 0
-    },
+    initialValues: {valorsInicials},
     validationSchema,
     onSubmit: (values) => {
        alert(JSON.stringify(values, null, 2));
     }
   })
 
+  const obrirModal = () => {
+    setTipoModal("Crear");
+    setValorsInicials({ name: '', description: '', price: '' });
+    setShowModal(true);
+  };
+
+  const tancarModal = () => setShowModal(false);
+
+  
+  const modificarProducte = (valors) => {
+    setTipoModal("Modificar");
+    setValorsInicials(valors);
+    setShowModal(true);
+  };
+
+  const eliminarProducte = async (id) => {
+    try {
+      await deleteData(url, "Product", id);
+      setData(data.filter((ele) => ele.id !== id));
+    } catch (error) {
+      console.error("Error eliminant el producte:", error);
+    }
+  };
+
+
   return (
     <>
     <div>Productes</div>
-
+     <button className="btn btn-primary mb-3" onClick={obrirModal} >
+        Alta Usuari
+      </button>
     <table>
         <thead>
           <tr>    
@@ -50,7 +77,7 @@ const validationSchema = Yup.object({
           <th>Nom</th>
           <th>Preu</th>
           <th>Descripció</th>
-          <th>Acciones</th>
+          <th colSpan={2}>Acciones</th>
         </tr>
       </thead>
          <tbody>
@@ -61,9 +88,8 @@ const validationSchema = Yup.object({
                  <td>{ele.name}</td>
                   <td>{ele.price}</td>
                    <td>{ele.description}</td>
-                   <td><button className='btn btn-primary' onClick={() => alert('Editar')}>Editar</button>
-                   <button className='btn btn-primary' onClick={() => alert('Esborrar')}>Esborrar</button>
-                   </td>
+                  <td><Button variant="warning" onClick={() => modificarProducte(ele)}>Modificar</Button></td>
+                  <td><Button variant="danger" onClick={() => eliminarProducte(ele.id)}>Eliminar</Button></td>
 
             </tr>
             )
@@ -72,23 +98,32 @@ const validationSchema = Yup.object({
 
     </table>
 
-         <div>
-        <h2>Alta Producte</h2>
+
+
+
+        <Modal show={showModal} onHide={tancarModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{tipoModal} Producte</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
         <form onSubmit={formik.handleSubmit}>
-            <label htmlFor="name">Nom:</label>
-            <input
-                type="text"
-                name="name"
-                value={formik.values.name}
-                placeholder="Enter name"
-                autoComplete="off"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-            />
+          <div className="mb-3">
+              <label htmlFor="name" className="form-label">Nom:</label>
+              <input
+                  type="text"
+                  name="name"
+                  value={formik.values.name}
+                  placeholder="Enter name"
+                  autoComplete="off"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+              />
+
             {formik.touched.name && formik.errors.name ? (
                 <div>{formik.errors.name}</div>
             ) : null}
-
+          </div>
+          <div className="mb-3">
             <label htmlFor="password">Descripció:</label>
             <input
                 type="text"
@@ -101,6 +136,8 @@ const validationSchema = Yup.object({
             {formik.touched.description && formik.errors.description ? (
                 <div>{formik.errors.description}</div>
             ) : null}
+            </div>
+            <div className="mb-3">
             <label htmlFor="password">Preu:</label>
             <input
                 type="number"
@@ -113,13 +150,15 @@ const validationSchema = Yup.object({
             {formik.touched.price && formik.errors.price ? (
                 <div>{formik.errors.price}</div>
             ) : null}
-            <input type="submit" value="Alta"></input>
+            </div>  
+          
+             <Button variant="secondary" onClick={tancarModal}>Tancar</Button>
+             <Button variant="primary" type="submit">{tipoModal}</Button>
+          
             </form>
             
-            </div>
-
-
-
+  </Modal.Body>
+  </Modal>  
 
     </>
   )
