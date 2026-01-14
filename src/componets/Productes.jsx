@@ -4,8 +4,11 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { Modal,Button } from 'react-bootstrap'
 
-// ESTATS
+
 const Productes = () => {
+
+
+// ESTATS
 const [data,setData]= useState([])
 const [showModal, setShowModal] = useState(false);
 const [tipoModal, setTipoModal] = useState("Crear");
@@ -41,7 +44,7 @@ const validationSchema = Yup.object({
       await updateId(url,"Product",values.id,values);
 }
 const response = await getData(url,'Product');
-      setData([...data,response]); 
+      setData(response); 
       tancarModal();       
 
     }
