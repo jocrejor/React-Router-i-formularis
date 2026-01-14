@@ -1,13 +1,12 @@
 import {useState,useEffect} from 'react'
-import {getData,url} from './apiAccess/crud'
+import {getData,url,deleteData,postData,updateId} from './apiAccess/crud'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { Modal,Button } from 'react-bootstrap'
 
-
+// ESTATS
 const Productes = () => {
 const [data,setData]= useState([])
-const [valorsInicials, setValorsInicials] = useState({ name: '', description: '', price: '' });
 const [showModal, setShowModal] = useState(false);
 const [tipoModal, setTipoModal] = useState("Crear");
 
@@ -32,16 +31,25 @@ const validationSchema = Yup.object({
 })
 
     const formik = useFormik({
-    initialValues: {valorsInicials},
+    initialValues: { name: '', description: '', price: 0 },
     validationSchema,
-    onSubmit: (values) => {
-       alert(JSON.stringify(values, null, 2));
+    onSubmit: async (values) => {
+      if (tipoModal === "Crear" ){
+      await postData(url,"Product",values);
+      }else{
+
+      await updateId(url,"Product",values.id,values);
+}
+const response = await getData(url,'Product');
+      setData([...data,response]); 
+      tancarModal();       
+
     }
   })
 
   const obrirModal = () => {
     setTipoModal("Crear");
-    setValorsInicials({ name: '', description: '', price: '' });
+    formik.setValues({ name: '', description: '', price: 0 });
     setShowModal(true);
   };
 
@@ -50,12 +58,12 @@ const validationSchema = Yup.object({
   
   const modificarProducte = (valors) => {
     setTipoModal("Modificar");
-    setValorsInicials(valors);
+    formik.setValues(valors);
     setShowModal(true);
   };
 
   const eliminarProducte = async (id) => {
-    try {
+    try { 
       await deleteData(url, "Product", id);
       setData(data.filter((ele) => ele.id !== id));
     } catch (error) {
@@ -80,7 +88,7 @@ const validationSchema = Yup.object({
           <th colSpan={2}>Acciones</th>
         </tr>
       </thead>
-         <tbody>
+         <tbody> 
         {data.map(ele =>{
         return(
             <tr key={ele.id}>
@@ -106,8 +114,9 @@ const validationSchema = Yup.object({
           <Modal.Title>{tipoModal} Producte</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit} >
           <div className="mb-3">
+              <input type="hidden" name="id" value={formik.values.id} />
               <label htmlFor="name" className="form-label">Nom:</label>
               <input
                   type="text"
@@ -124,7 +133,7 @@ const validationSchema = Yup.object({
             ) : null}
           </div>
           <div className="mb-3">
-            <label htmlFor="password">Descripció:</label>
+            <label htmlFor="password" className="form-label">Descripció:</label>
             <input
                 type="text"
                 name="description"
@@ -138,7 +147,7 @@ const validationSchema = Yup.object({
             ) : null}
             </div>
             <div className="mb-3">
-            <label htmlFor="password">Preu:</label>
+            <label htmlFor="password" className="form-label">Preu:</label>
             <input
                 type="number"
                 name="price"
